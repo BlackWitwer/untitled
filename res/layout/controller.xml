@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<GridLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android">
+    <Button
+            android:layout_width="150dp"
+            android:layout_height="fill_parent"
+            android:text="Left"
+            android:id="@+id/buttonLeft" android:layout_row="1" android:layout_column="0"
+            android:onClick="onClickButtonLeft"/>
+    <Button
+            android:layout_width="150dp"
+            android:layout_height="fill_parent"
+            android:text="Right"
+            android:id="@+id/buttonRight" android:layout_row="1" android:layout_column="2"
+            android:onClick="onClickButtonRight"/>
+</GridLayout>

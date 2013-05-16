@@ -14,10 +14,10 @@ import android.view.View;
  * To change this template use File | Settings | File Templates.
  */
 public class DrawView extends View {
-	Bitmap bitmap;
-	Canvas bitmapCanvas;
-	boolean isInitialized;
-	Paint paint = new Paint();
+	private Bitmap bitmap;
+	private Canvas bitmapCanvas;
+	private boolean isInitialized;
+	private Paint paint = new Paint();
 
 	public DrawView(Context context) {
 		this(context, null);

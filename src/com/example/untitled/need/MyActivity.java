@@ -6,9 +6,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
+import android.view.*;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -19,9 +17,14 @@ import java.util.UUID;
 
 public class MyActivity extends Activity {
 
-	public static final UUID MY_UUID = UUID.fromString("8B449A87-E4BC-4036-89AD-9E8978AE723D");
+	public static final UUID MY_UUID1 = UUID.fromString("8B449A87-E4BC-4036-89AD-9E8978AE723D");
+	public static final UUID MY_UUID2 = UUID.fromString("0e950aa0-be3c-11e2-9e96-0800200c9a66");
 
 	private Controller ctrl;
+
+	private DrawView draw;
+
+	private SurfaceHolder holder;
 
 	/**
 	 * Called when the activity is first created.
@@ -32,7 +35,7 @@ public class MyActivity extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		setContentView(R.layout.game);
+//		setContentView(R.layout.game);
 		setContentView(R.layout.main);
 		if (!BluetoothConnector.getInstance().getAdapter().isEnabled()) {
 			Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -73,7 +76,7 @@ public class MyActivity extends Activity {
 				ctrl.createBluetoothConnection(item);
 				changeContentView(R.layout.controller);
 				adapter.notifyDataSetChanged();
-				view.setAlpha(1);
+//				view.setAlpha(1);
 			}
 		});
 	}
@@ -94,8 +97,8 @@ public class MyActivity extends Activity {
 		ctrl.startController();
 	}
 
-	public void write(int aValue) {
-		((TextView) findViewById(R.id.textTest)).setText(aValue+"");
+	public void write(String aValue) {
+		((TextView) findViewById(R.id.textTest)).setText(aValue);
 	}
 
 	public void onClickButtonLeft(View view) {
@@ -107,15 +110,47 @@ public class MyActivity extends Activity {
 	}
 
 	public void drawBitmap(Bitmap aBitmap) {
-		((DrawView) findViewById(R.id.drawView)).drawBitmap(aBitmap);
-		findViewById(R.id.drawView).invalidate();
+		getDrawView().drawBitmap(aBitmap);
+		getDrawView().invalidate();
 	}
 
 	public int getDrawViewHeight() {
-		return findViewById(R.id.drawView).getHeight();
+//		return getDrawView().getHeight();
+		return findViewById(R.id.surfaceView).getHeight();
 	}
 
 	public int getDrawViewWidth() {
-		return findViewById(R.id.drawView).getWidth();
+//		return getDrawView().getWidth();
+		return findViewById(R.id.surfaceView).getWidth();
+	}
+
+	public DrawView getDrawView() {
+		if (draw == null) {
+//			draw = ((DrawView) findViewById(R.id.drawView));
+		}
+		return draw;
+	}
+
+	public SurfaceHolder getHolder() {
+		if (holder == null) {
+			holder = ((SurfaceView) findViewById(R.id.surfaceView)).getHolder();
+			holder.addCallback(new SurfaceHolder.Callback() {
+				@Override
+				public void surfaceCreated(SurfaceHolder surfaceHolder) {
+					//To change body of implemented methods use File | Settings | File Templates.
+				}
+
+				@Override
+				public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i2, int i3) {
+					//To change body of implemented methods use File | Settings | File Templates.
+				}
+
+				@Override
+				public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+					//To change body of implemented methods use File | Settings | File Templates.
+				}
+			});
+		}
+		return holder;
 	}
 }

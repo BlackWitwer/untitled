@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.graphics.Bitmap;
 import android.os.Handler;
+import android.view.SurfaceHolder;
 import com.example.untitled.R;
 
 import java.io.IOException;
@@ -53,26 +54,21 @@ public class Controller {
 	}
 
 	public void createBluetoothServer() {
-		socket = BluetoothConnector.getInstance().createServer();
+		socket = BluetoothConnector.getInstance().createServer("Server1", MyActivity.MY_UUID1);
 		receiver = new BluetoothReceiver(socket, this, 1);
 		pong = new Pong(this);
+		pong.setBotActive(true);
 	}
 
 	public void createBluetoothServer2() {
-		socket = BluetoothConnector.getInstance().createServer();
+		socket = BluetoothConnector.getInstance().createServer("Server1", MyActivity.MY_UUID1);
 		receiver = new BluetoothReceiver(socket, this, 1);
-		socket2 = BluetoothConnector.getInstance().createServer();
-		receiver2 = new BluetoothReceiver(socket, this, 2);
+		socket2 = BluetoothConnector.getInstance().createServer("Server2", MyActivity.MY_UUID2);
+		receiver2 = new BluetoothReceiver(socket2, this, 2);
 		pong = new Pong(this);
 	}
 
 	public void receiveInput(final int aInput, int aId) {
-		activity.runOnUiThread(new Runnable() {
-			public void run() {
-				activity.write(aInput);
-			}
-		});
-
 		if (pong != null) {
 			if (aId == 1) {
 				pong.setInputPlayer1(aInput);
@@ -80,6 +76,14 @@ public class Controller {
 				pong.setInputPlayer2(aInput);
 			}
 		}
+	}
+
+	public void writeOnGameLabel(final String aMessage) {
+		activity.runOnUiThread(new Runnable() {
+			public void run() {
+				activity.write(aMessage);
+			}
+		});
 	}
 
 	public void drawBitmap(final Bitmap aBitmap) {
@@ -136,5 +140,9 @@ public class Controller {
 			drawWidth = activity.getDrawViewWidth();
 		}
 		return drawWidth;
+	}
+
+	public SurfaceHolder getHolder() {
+		return activity.getHolder();
 	}
 }

@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothSocket;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Created with IntelliJ IDEA.
@@ -61,13 +62,22 @@ public class BluetoothConnector {
 	public BluetoothSocket createConnection(BluetoothDevice aDevice) {
 		BluetoothSocket theSocket = null;
 		try {
-			theSocket = aDevice.createRfcommSocketToServiceRecord(MyActivity.MY_UUID);
-			getInstance().getAdapter().cancelDiscovery();
+			theSocket = aDevice.createRfcommSocketToServiceRecord(MyActivity.MY_UUID1);
+//			getInstance().getAdapter().cancelDiscovery();
 			theSocket.connect();
 		} catch (IOException e) {
 			try {
 				theSocket.close();
+				theSocket = null;
+				theSocket = aDevice.createRfcommSocketToServiceRecord(MyActivity.MY_UUID2);
+				theSocket.connect();
 			} catch (IOException e1) {
+				try {
+					theSocket.close();
+					return null;
+				} catch (IOException e2) {
+					e2.printStackTrace();
+				}
 				e1.printStackTrace();
 			}
 			e.printStackTrace();
@@ -75,13 +85,12 @@ public class BluetoothConnector {
 		return theSocket;
 	}
 
-	public BluetoothSocket createServer () {
+	public BluetoothSocket createServer (String aName, UUID aUUID) {
 		BluetoothServerSocket mmServerSocket;
 		BluetoothSocket socket = null;
 
-		String NAME = "Name";
 		try {
-			mmServerSocket = getInstance().getAdapter().listenUsingRfcommWithServiceRecord(NAME, MyActivity.MY_UUID);
+			mmServerSocket = getInstance().getAdapter().listenUsingRfcommWithServiceRecord(aName, aUUID);
 			socket = mmServerSocket.accept();
 			if (socket != null) {
 				mmServerSocket.close();

@@ -27,7 +27,7 @@ public class AcceptThread extends Thread {
 		BluetoothServerSocket tmp = null;
 		try {
 			// MY_UUID is the app’s UUID string, also used by the client code.
-			tmp = BluetoothConnector.getInstance().getAdapter().listenUsingRfcommWithServiceRecord(NAME, MyActivity.MY_UUID);
+			tmp = BluetoothConnector.getInstance().getAdapter().listenUsingRfcommWithServiceRecord(NAME, MyActivity.MY_UUID1);
 		} catch (IOException e) { }
 		mmServerSocket = tmp;
 	}

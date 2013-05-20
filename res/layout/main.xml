@@ -12,11 +12,11 @@
     <Button
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Game"
+            android:text="1 Player"
             android:id="@+id/buttonGame" android:onClick="startGame"/>
     <Button
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Game2"
+            android:text="2 Player"
             android:id="@+id/buttonGame2" android:onClick="startGame2"/>
 </LinearLayout>

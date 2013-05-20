@@ -1,4 +1,4 @@
-package com.example.untitled.need;
+package com.untitled.need;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -35,7 +35,6 @@ public class MyActivity extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
-//		setContentView(R.layout.game);
 		setContentView(R.layout.main);
 		if (!BluetoothConnector.getInstance().getAdapter().isEnabled()) {
 			Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -76,7 +75,6 @@ public class MyActivity extends Activity {
 				ctrl.createBluetoothConnection(item);
 				changeContentView(R.layout.controller);
 				adapter.notifyDataSetChanged();
-//				view.setAlpha(1);
 			}
 		});
 	}

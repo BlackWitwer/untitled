@@ -1,9 +1,10 @@
-package com.example.untitled.need;
+package com.untitled.need;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.graphics.Bitmap;
-import android.os.Handler;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.view.SurfaceHolder;
 import com.example.untitled.R;
 
@@ -15,7 +16,6 @@ import java.io.OutputStream;
  * User: Black
  * Date: 12.05.13
  * Time: 15:43
- * To change this template use File | Settings | File Templates.
  */
 public class Controller {
 
@@ -26,13 +26,49 @@ public class Controller {
 	private BluetoothReceiver receiver2;
 	private OutputStream out;
 
+	private Thread graphicThread;
+	private boolean isRunning;
+	private Canvas canvas;
+
 	private int drawHeight;
 	private int drawWidth;
 
-	private Pong pong;
+	private BluetoothGameIF game;
 
 	public Controller(MyActivity aActivity) {
 		this.activity = aActivity;
+	}
+
+	private void initThread() {
+		graphicThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while (isRunning) {
+					if (game != null) {
+						canvas = null;
+						try {
+							canvas = getHolder().lockCanvas();
+							synchronized (getHolder()) {
+								if (canvas != null) {
+									game.onDraw(canvas);
+								}
+							}
+						} finally {
+							if (canvas != null) {
+								getHolder().unlockCanvasAndPost(canvas);
+							}
+						}
+					}
+				}
+			}
+		});
+
+		isRunning = true;
+	}
+
+	private void startGraphicThread() {
+		initThread();
+		graphicThread.start();
 	}
 
 	public void startGame() {
@@ -56,8 +92,9 @@ public class Controller {
 	public void createBluetoothServer() {
 		socket = BluetoothConnector.getInstance().createServer("Server1", MyActivity.MY_UUID1);
 		receiver = new BluetoothReceiver(socket, this, 1);
-		pong = new Pong(this);
-		pong.setBotActive(true);
+		game = new Pong(this);
+		((Pong)game).setBotActive(true);
+		startGraphicThread();
 	}
 
 	public void createBluetoothServer2() {
@@ -65,15 +102,16 @@ public class Controller {
 		receiver = new BluetoothReceiver(socket, this, 1);
 		socket2 = BluetoothConnector.getInstance().createServer("Server2", MyActivity.MY_UUID2);
 		receiver2 = new BluetoothReceiver(socket2, this, 2);
-		pong = new Pong(this);
+		game = new Pong(this);
+		startGraphicThread();
 	}
 
 	public void receiveInput(final int aInput, int aId) {
-		if (pong != null) {
+		if (game != null) {
 			if (aId == 1) {
-				pong.setInputPlayer1(aInput);
+				game.inputPlayer1(aInput);
 			} else {
-				pong.setInputPlayer2(aInput);
+				game.inputPlayer2(aInput);
 			}
 		}
 	}
@@ -82,15 +120,6 @@ public class Controller {
 		activity.runOnUiThread(new Runnable() {
 			public void run() {
 				activity.write(aMessage);
-			}
-		});
-	}
-
-	public void drawBitmap(final Bitmap aBitmap) {
-		activity.runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				activity.drawBitmap(aBitmap);
 			}
 		});
 	}
@@ -107,6 +136,7 @@ public class Controller {
 	}
 
 	public void close() {
+		isRunning = false;
 		if (receiver != null) {
 			receiver.close();
 		}

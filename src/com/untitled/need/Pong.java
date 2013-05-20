@@ -1,20 +1,16 @@
-package com.example.untitled.need;
+package com.untitled.need;
 
-import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.view.SurfaceHolder;
 
 /**
  * Created with IntelliJ IDEA.
  * User: Black
  * Date: 13.05.13
  * Time: 20:33
- * To change this template use File | Settings | File Templates.
  */
-public class Pong implements Runnable {
+public class Pong implements Runnable, BluetoothGameIF {
 
 	public static final int CONTROLLER_LEFT = 1;
 	public static final int CONTROLLER_RIGHT = 2;
@@ -25,8 +21,6 @@ public class Pong implements Runnable {
 	private boolean running;
 	private final int sleepTime = 20;
 
-	private Bitmap theBitmap;
-	private Canvas bitmapCanvas;
 	private Paint paint = new Paint();
 
 	private int speedPong;
@@ -58,7 +52,7 @@ public class Pong implements Runnable {
 	}
 
 	private void init() {
-		speed = 6;
+		speed = 7;
 		height = 100;
 		width = 20;
 		p1PosY = ctrl.getHeight()/2 - height/2;
@@ -146,9 +140,6 @@ public class Pong implements Runnable {
 				verPart = -1;
 			}
 
-
-
-			draw();
 			try {
 				timenow = System.currentTimeMillis();
 				Thread.sleep((timenow-time) > sleepTime ? 1 : sleepTime-(timenow-time));
@@ -157,47 +148,29 @@ public class Pong implements Runnable {
 			}
 		}
 	}
-
-	public void draw() {
-		if (ctrl.getHeight() > 0 && ctrl.getWidth() > 0) {
-//			if (theBitmap == null) {
-//				initDrawZeugs();
-//			} else {
-//				bitmapCanvas.drawColor(Color.BLACK);
-//				bitmapCanvas.drawRect(10, p1PosY, 10+width, p1PosY + height, paint);
-//				bitmapCanvas.drawRect(ctrl.getWidth()-10-width, p2PosY, ctrl.getWidth()-10, p2PosY + height, paint);
-//				bitmapCanvas.drawRect((int)xPos, (int)yPos, widthPong + (int)xPos, heightPong + (int)yPos, paint);
 //
-//				ctrl.drawBitmap(theBitmap);
+//	public void draw() {
+//		if (ctrl.getHeight() > 0 && ctrl.getWidth() > 0) {
+//			bitmapCanvas = null;
+//			try {
+//				bitmapCanvas = ctrl.getHolder().lockCanvas();
+//				synchronized (ctrl.getHolder()) {
+//					if (bitmapCanvas != null) {
+//
+//					}
+//				}
+//			} finally {
+//				if (bitmapCanvas != null) {
+//					ctrl.getHolder().unlockCanvasAndPost(bitmapCanvas);
+//				}
 //			}
-			bitmapCanvas = null;
-			try {
-				bitmapCanvas = ctrl.getHolder().lockCanvas();
-				synchronized (ctrl.getHolder()) {
-					if (bitmapCanvas != null) {
-						bitmapCanvas.drawColor(Color.BLACK);
-						bitmapCanvas.drawRect(10, p1PosY, 10+width, p1PosY + height, paint);
-						bitmapCanvas.drawRect(ctrl.getWidth()-10-width, p2PosY, ctrl.getWidth()-10, p2PosY + height, paint);
-						bitmapCanvas.drawRect((int)xPos, (int)yPos, widthPong + (int)xPos, heightPong + (int)yPos, paint);
-					}
-				}
-			} finally {
-				if (bitmapCanvas != null) {
-					ctrl.getHolder().unlockCanvasAndPost(bitmapCanvas);
-				}
-			}
-		}
-	}
+//		}
+//	}
 
 	public void initDrawZeugs() {
-//		theBitmap = Bitmap.createBitmap(ctrl.getWidth(), ctrl.getHeight(), Bitmap.Config.RGB_565);
 		paint.setColor(Color.WHITE);
 		paint.setAntiAlias(true);
 		paint.setStyle(Paint.Style.FILL_AND_STROKE);
-
-//		bitmapCanvas = new Canvas();
-//		bitmapCanvas.setBitmap(theBitmap);
-//		bitmapCanvas.drawColor(Color.BLACK);
 	}
 
 	private double calcHorSpeed() {
@@ -210,15 +183,30 @@ public class Pong implements Runnable {
 		return speedPong*verPart/ges;
 	}
 
-	public void setInputPlayer1(int inputPlayer1) {
-		this.inputPlayer1 = inputPlayer1;
-	}
-
-	public void setInputPlayer2(int inputPlayer2) {
-		this.inputPlayer2 = inputPlayer2;
-	}
-
 	public void setBotActive(boolean botActive) {
 		this.botActive = botActive;
+	}
+
+	@Override
+	public String getName() {
+		return "Pong";
+	}
+
+	@Override
+	public void onDraw(Canvas c) {
+		c.drawColor(Color.BLACK);
+		c.drawRect(10, p1PosY, 10+width, p1PosY + height, paint);
+		c.drawRect(ctrl.getWidth()-10-width, p2PosY, ctrl.getWidth()-10, p2PosY + height, paint);
+		c.drawRect((int)xPos, (int)yPos, widthPong + (int)xPos, heightPong + (int)yPos, paint);
+	}
+
+	@Override
+	public void inputPlayer1(int aInput) {
+		this.inputPlayer1 = aInput;
+	}
+
+	@Override
+	public void inputPlayer2(int aInput) {
+		this.inputPlayer2 = aInput;
 	}
 }

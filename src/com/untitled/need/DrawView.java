@@ -1,6 +1,5 @@
-package com.example.untitled.need;
+package com.untitled.need;
 
-import android.R;
 import android.content.Context;
 import android.graphics.*;
 import android.util.AttributeSet;
@@ -11,7 +10,6 @@ import android.view.View;
  * User: Black
  * Date: 13.05.13
  * Time: 19:49
- * To change this template use File | Settings | File Templates.
  */
 public class DrawView extends View {
 	private Bitmap bitmap;
@@ -24,7 +22,7 @@ public class DrawView extends View {
 	}
 
 	public DrawView(Context context, AttributeSet attrs) {
-		this(context, attrs, R.attr.buttonStyle);
+		this(context, attrs, android.R.attr.buttonStyle);
 	}
 
 	public DrawView(Context context, AttributeSet attrs, int defStyle) {

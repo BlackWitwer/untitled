@@ -1,15 +1,16 @@
 package com.untitled.need;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.view.SurfaceHolder;
-import com.example.untitled.R;
+import com.untitled.activities.*;
+import com.untitled.archer.ArcherMain;
+import com.untitled.pong.Pong;
 
 import java.io.IOException;
-import java.io.OutputStream;
+import java.util.ArrayList;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,12 +20,13 @@ import java.io.OutputStream;
  */
 public class Controller {
 
-	private MyActivity activity;
-	private BluetoothSocket socket;
-	private BluetoothSocket socket2;
-	private BluetoothReceiver receiver;
-	private BluetoothReceiver receiver2;
-	private OutputStream out;
+	public static final int CONTROLLER_PONG = 1;
+	public static final int CONTROLLER_ARCHER = 2;
+
+	private static Controller ctrl;
+
+	private Activity activity;
+	private ArrayList<Device> devices;
 
 	private Thread graphicThread;
 	private boolean isRunning;
@@ -34,9 +36,17 @@ public class Controller {
 	private int drawWidth;
 
 	private BluetoothGameIF game;
+	private AcceptThread acceptThread;
 
-	public Controller(MyActivity aActivity) {
-		this.activity = aActivity;
+	private Controller() {
+		init();
+	}
+
+	private void init() {
+		game = new Pong(this);
+		devices = new ArrayList<Device>();
+		acceptThread = new AcceptThread();
+		acceptThread.start();
 	}
 
 	private void initThread() {
@@ -72,64 +82,24 @@ public class Controller {
 	}
 
 	public void startGame() {
-		activity.setContentView(R.layout.game);
-		createBluetoothServer();
-	}
-
-	public void startGame2() {
-		activity.setContentView(R.layout.game);
-		createBluetoothServer2();
-	}
-
-	public void startController() {
-		activity.setContentView(R.layout.device_selector);
+		startGraphicThread();
+		game.startGame();
 	}
 
 	public void createBluetoothConnection(BluetoothDevice aDevice) {
-		socket = BluetoothConnector.getInstance().createConnection(aDevice);
-	}
-
-	public void createBluetoothServer() {
-		socket = BluetoothConnector.getInstance().createServer("Server1", MyActivity.MY_UUID1);
-		receiver = new BluetoothReceiver(socket, this, 1);
-		game = new Pong(this);
-		((Pong)game).setBotActive(true);
-		startGraphicThread();
-	}
-
-	public void createBluetoothServer2() {
-		socket = BluetoothConnector.getInstance().createServer("Server1", MyActivity.MY_UUID1);
-		receiver = new BluetoothReceiver(socket, this, 1);
-		socket2 = BluetoothConnector.getInstance().createServer("Server2", MyActivity.MY_UUID2);
-		receiver2 = new BluetoothReceiver(socket2, this, 2);
-		game = new Pong(this);
-		startGraphicThread();
-	}
-
-	public void receiveInput(final int aInput, int aId) {
-		if (game != null) {
-			if (aId == 1) {
-				game.inputPlayer1(aInput);
-			} else {
-				game.inputPlayer2(aInput);
-			}
+		BluetoothSocket theSocket = BluetoothConnector.getInstance().createConnection(aDevice);
+		if (theSocket != null) {
+			addConnection(theSocket);
+		} else {
+			//TODO Fehlermeldung einfügen
 		}
-	}
-
-	public void writeOnGameLabel(final String aMessage) {
-		activity.runOnUiThread(new Runnable() {
-			public void run() {
-				activity.write(aMessage);
-			}
-		});
 	}
 
 	public void sendValue(int aValue) {
 		try {
-			if (out == null) {
-				out = socket.getOutputStream();
+			for (Device eachDevice : devices) {
+				eachDevice.sendValue(aValue);
 			}
-			out.write(aValue);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -137,42 +107,164 @@ public class Controller {
 
 	public void close() {
 		isRunning = false;
-		if (receiver != null) {
-			receiver.close();
-		}
-		if (receiver2 != null) {
-			receiver2.close();
-		}
-		try {
-			if (out != null) {
-				out.close();
+		for (Device device : devices) {
+			try {
+				device.close();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			if (socket != null) {
-				socket.close();
-			}
-			if (socket2 != null) {
-				socket2.close();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
+		devices.clear();
 	}
 
 	public int getHeight() {
-		if (drawHeight <= 0) {
-			drawHeight = activity.getDrawViewHeight();
+		if (activity instanceof GameView) {
+			if (drawHeight <= 0) {
+				drawHeight = ((GameView)activity).getDrawViewHeight();
+			}
+			return drawHeight;
 		}
-		return drawHeight;
+		return -1;
 	}
 
 	public int getWidth() {
-		if (drawWidth <= 0) {
-			drawWidth = activity.getDrawViewWidth();
+		if (activity instanceof  GameView) {
+			if (drawWidth <= 0) {
+				drawWidth = ((GameView)activity).getDrawViewWidth();
+			}
+			return drawWidth;
 		}
-		return drawWidth;
+		return -1;
 	}
 
 	public SurfaceHolder getHolder() {
-		return activity.getHolder();
+		if (activity instanceof GameView) {
+			return ((GameView)activity).getHolder();
+		}
+		return null;
+	}
+
+	public void setActivity(Activity aActivity) {
+		activity = aActivity;
+	}
+
+	public static Controller getController() {
+		if (ctrl == null) {
+			ctrl = new Controller();
+		}
+		return ctrl;
+	}
+
+	public BluetoothGameIF getGame() {
+		return game;
+	}
+
+	public int getDeviceCount() {
+		return devices.size();
+	}
+
+	public void addConnection(BluetoothSocket aSocket) {
+		Device theDevice = new Device(aSocket);
+		theDevice.addOnDisconnectListener( new Device.OnDisconnectListener() {
+			@Override
+			public void onDisconnect(Device aDevice) {
+				if (game != null) {
+					game.disconnectDevice(aDevice);
+				}
+				try {
+					aDevice.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				devices.remove(aDevice);
+			}
+		});
+		theDevice.addInputListener(new Device.OnInputListener() {
+			@Override
+			public void onInput(int aInput, Device aDevice) {
+				if (game != null) {
+					game.inputPlayer(aInput, aDevice);
+				}
+				if (aInput/10 == 123456789) {
+					changeController(aInput);
+				}
+			}
+		});
+		devices.add(theDevice);
+
+		if (game != null) {
+			game.newDevice(theDevice);
+		}
+
+		if (activity instanceof BluetoothLobby || activity instanceof GameView) {
+			try {
+				int value = 1234567890 + getGameId();
+				theDevice.sendValue(value);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		updateLobby();
+	}
+
+	private void changeController(int aInput) {
+		if (activity instanceof DeviceChoose) {
+			switch(aInput-1234567890) {
+				case CONTROLLER_PONG:
+					((DeviceChoose)activity).changeActivity(PongController.class);
+					break;
+
+				case CONTROLLER_ARCHER:
+					((DeviceChoose)activity).changeActivity(ArcherController.class);
+					break;
+			}
+		}
+	}
+
+	public int getGameId() {
+		if (game instanceof ArcherMain) {
+			return CONTROLLER_ARCHER;
+		}
+		if (game instanceof Pong) {
+			return CONTROLLER_PONG;
+		}
+		return 0;
+	}
+
+	public void startWaitForDevice() {
+		acceptThread.setWaitForDevice(true);
+	}
+
+	public void stopWaitForDevice() {
+		acceptThread.setWaitForDevice(false);
+	}
+
+	public ArrayList<Device> getDevices() {
+		return devices;
+	}
+
+	public void gameClosed() {
+		isRunning = false;
+		updateLobby();
+	}
+
+	public void controllerClosed() {
+		close();
+	}
+
+	public void lobbyClosed() {
+		close();
+		stopWaitForDevice();
+	}
+
+	private void updateLobby() {
+		if (activity instanceof BluetoothLobby) {
+			activity.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					((BluetoothLobby)activity).initDeviceSelector();
+				}
+			});
+		}
 	}
 }

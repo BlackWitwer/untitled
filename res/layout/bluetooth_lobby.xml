@@ -8,15 +8,15 @@
     <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Wähle ein Gerät"
-            android:id="@+id/textView"/>
+            android:id="@+id/lobbyText"/>
     <ListView
             android:layout_width="fill_parent"
             android:layout_height="match_parent"
-            android:id="@+id/deviceListView" android:layout_weight="20"/>
+            android:id="@+id/devicesListView" android:layout_weight="20" android:headerDividersEnabled="false"/>
     <Button
             android:layout_width="fill_parent"
-            android:layout_height="150px"
-            android:text="Aktualisieren"
-            android:id="@+id/button" android:onClick="reloadPairedDevices"/>
+            android:layout_height="50px"
+            android:text="Start"
+            android:id="@+id/button" android:onClick="startGame"/>
+
 </LinearLayout>

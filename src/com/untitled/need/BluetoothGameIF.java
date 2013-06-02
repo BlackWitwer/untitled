@@ -14,7 +14,19 @@ public interface BluetoothGameIF {
 
 	public void onDraw(Canvas c);
 
-	public void inputPlayer1(int aInput);
+	public void inputPlayer(int aInput, Device aDevice);
 
-	public void inputPlayer2(int aInput);
+	public int getMinDeviceCount();
+
+	public int getMaxDeviceCount();
+
+	public void startGame();
+
+	public void stopGame();
+
+	public void pauseGame();
+
+	public void newDevice(Device aDevice);
+
+	public void disconnectDevice(Device aDevice);
 }

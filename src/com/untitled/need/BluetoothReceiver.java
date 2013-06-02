@@ -2,6 +2,7 @@ package com.untitled.need;
 
 import android.bluetooth.BluetoothSocket;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -14,21 +15,19 @@ import java.io.InputStream;
  */
 public class BluetoothReceiver implements Runnable {
 
-	private InputStream input;
+	private DataInputStream input;
 	private Thread th;
 	private boolean running;
-	private Controller ctrl;
-	private int id;
+	private Device device;
 
-	public BluetoothReceiver(BluetoothSocket aSocket, Controller aController, int aId) {
+	public BluetoothReceiver(BluetoothSocket aSocket, Device aDevice) {
 		try {
-			this.id = aId;
-			this.input = aSocket.getInputStream();
+			this.input = new DataInputStream(aSocket.getInputStream());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		this.running = true;
-		this.ctrl = aController;
+		this.device = aDevice;
 		start();
 	}
 
@@ -37,24 +36,20 @@ public class BluetoothReceiver implements Runnable {
 		th.start();
 	}
 
-	public void close() {
-		th.stop();
+	public void close() throws  IOException{
 		this.running = false;
-		try {
-			input.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		input.close();
 	}
 
 	@Override
 	public void run() {
 		while(running) {
 			try {
-				int tmp = input.read();
-				ctrl.receiveInput(tmp, id);
+				int tmp = input.readInt();
+				device.receiveInput(tmp);
 			} catch (IOException e) {
 				e.printStackTrace();
+				device.disconnected();
 			}
 		}
 	}

@@ -1,8 +1,11 @@
-package com.untitled.need;
+package com.untitled.pong;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import com.untitled.need.BluetoothGameIF;
+import com.untitled.need.Controller;
+import com.untitled.need.Device;
 
 /**
  * Created with IntelliJ IDEA.
@@ -35,20 +38,19 @@ public class Pong implements Runnable, BluetoothGameIF {
 	private int height;
 	private int width;
 
+	private Device deviceP1;
 	private int inputPlayer1;
 	private int p1PosY;
 	private int p1Points = 0;
 
+	private Device deviceP2;
 	private int inputPlayer2;
 	private int p2PosY;
 	private int p2Points = 0;
 
-	private boolean botActive = false;
-
 	public Pong(Controller aCtrl) {
 		this.ctrl = aCtrl;
 		init();
-		start();
 	}
 
 	private void init() {
@@ -70,7 +72,7 @@ public class Pong implements Runnable, BluetoothGameIF {
 		initDrawZeugs();
 	}
 
-	public void start() {
+	private void start() {
 		thread = new Thread(this);
 		running = true;
 		thread.start();
@@ -104,11 +106,19 @@ public class Pong implements Runnable, BluetoothGameIF {
 				p2PosY -= speed;
 			}
 
-			if (botActive) {
+			if (deviceP2 == null) {
 				if (yPos > p2PosY+height/2) {
 					inputPlayer2 = CONTROLLER_LEFT;
 				} else {
 					inputPlayer2 = CONTROLLER_RIGHT;
+				}
+			}
+
+			if (deviceP1 == null) {
+				if (yPos > p1PosY+height/2) {
+					inputPlayer1 = CONTROLLER_LEFT;
+				} else {
+					inputPlayer1 = CONTROLLER_RIGHT;
 				}
 			}
 
@@ -127,11 +137,9 @@ public class Pong implements Runnable, BluetoothGameIF {
 			} else if (xPos < 0) {
 				init();
 				p2Points++;
-				ctrl.writeOnGameLabel(p1Points + " : " + p2Points);
 			} else if (xPos+widthPong > ctrl.getWidth()) {
 				init();
 				p1Points++;
-				ctrl.writeOnGameLabel(p1Points + " : " + p2Points);
 			}
 
 			if (yPos < 0) {
@@ -148,24 +156,6 @@ public class Pong implements Runnable, BluetoothGameIF {
 			}
 		}
 	}
-//
-//	public void draw() {
-//		if (ctrl.getHeight() > 0 && ctrl.getWidth() > 0) {
-//			bitmapCanvas = null;
-//			try {
-//				bitmapCanvas = ctrl.getHolder().lockCanvas();
-//				synchronized (ctrl.getHolder()) {
-//					if (bitmapCanvas != null) {
-//
-//					}
-//				}
-//			} finally {
-//				if (bitmapCanvas != null) {
-//					ctrl.getHolder().unlockCanvasAndPost(bitmapCanvas);
-//				}
-//			}
-//		}
-//	}
 
 	public void initDrawZeugs() {
 		paint.setColor(Color.WHITE);
@@ -183,10 +173,6 @@ public class Pong implements Runnable, BluetoothGameIF {
 		return speedPong*verPart/ges;
 	}
 
-	public void setBotActive(boolean botActive) {
-		this.botActive = botActive;
-	}
-
 	@Override
 	public String getName() {
 		return "Pong";
@@ -198,15 +184,59 @@ public class Pong implements Runnable, BluetoothGameIF {
 		c.drawRect(10, p1PosY, 10+width, p1PosY + height, paint);
 		c.drawRect(ctrl.getWidth()-10-width, p2PosY, ctrl.getWidth()-10, p2PosY + height, paint);
 		c.drawRect((int)xPos, (int)yPos, widthPong + (int)xPos, heightPong + (int)yPos, paint);
+		c.drawText(p1Points + " : " + p2Points, ctrl.getWidth()/2-10, 10, paint);
 	}
 
 	@Override
-	public void inputPlayer1(int aInput) {
-		this.inputPlayer1 = aInput;
+	public void inputPlayer(int aInput, Device aDevice) {
+		if (aDevice.equals(deviceP1)) {
+			inputPlayer1 = aInput;
+		} else if (aDevice.equals(deviceP2)) {
+			inputPlayer2 = aInput;
+		}
 	}
 
 	@Override
-	public void inputPlayer2(int aInput) {
-		this.inputPlayer2 = aInput;
+	public int getMinDeviceCount() {
+		return 1;
+	}
+
+	@Override
+	public int getMaxDeviceCount() {
+		return 2;
+	}
+
+	@Override
+	public void startGame() {
+		start();
+	}
+
+	@Override
+	public void stopGame() {
+		running = false;
+	}
+
+	@Override
+	public void pauseGame() {
+		//To change body of implemented methods use File | Settings | File Templates.
+	}
+
+	@Override
+	public void newDevice(Device aDevice) {
+		if (deviceP1 == null) {
+			deviceP1 = aDevice;
+		} else if (deviceP2 == null) {
+			deviceP2 = aDevice;
+		}
+	}
+
+	@Override
+	public void disconnectDevice(Device aDevice) {
+		if (aDevice.equals(deviceP1)) {
+			deviceP1 = null;
+		}
+		if (aDevice.equals(deviceP2)) {
+			deviceP2 = null;
+		}
 	}
 }

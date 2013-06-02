@@ -4,19 +4,26 @@
         android:orientation="vertical"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:id="@+id/textView" android:layout_weight="20"/>
     <Button
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="Controller"
             android:id="@+id/buttonController" android:singleLine="false" android:onClick="startController"/>
+    <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView2" android:singleLine="false"/>
     <Button
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="1 Player"
+            android:text="Game"
             android:id="@+id/buttonGame" android:onClick="startGame"/>
-    <Button
+    <TextView
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="2 Player"
-            android:id="@+id/buttonGame2" android:onClick="startGame2"/>
+            android:layout_height="fill_parent"
+            android:id="@+id/textView1" android:layout_weight="20"/>
 </LinearLayout>

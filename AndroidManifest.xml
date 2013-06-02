@@ -8,13 +8,33 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <application android:label="@string/app_name" android:icon="@drawable/ic_launcher">
-        <activity android:name="com.untitled.need.MyActivity"
+        <activity android:name="com.untitled.activities.MainActivity"
                   android:label="@string/app_name"
                     android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+        <activity android:name="com.untitled.activities.ArcherController"
+                  android:label="@string/app_name"
+                  android:screenOrientation="landscape">
+        </activity>
+        <activity android:name="com.untitled.activities.BluetoothLobby"
+                  android:label="@string/app_name"
+                  android:screenOrientation="landscape">
+        </activity>
+        <activity android:name="com.untitled.activities.DeviceChoose"
+                  android:label="@string/app_name"
+                  android:screenOrientation="landscape">
+        </activity>
+        <activity android:name="com.untitled.activities.GameView"
+                  android:label="@string/app_name"
+                  android:screenOrientation="landscape">
+        </activity>
+        <activity android:name="com.untitled.activities.PongController"
+                  android:label="@string/app_name"
+                  android:screenOrientation="landscape">
         </activity>
     </application>
 </manifest>

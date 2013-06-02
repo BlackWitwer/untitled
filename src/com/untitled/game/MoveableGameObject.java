@@ -8,38 +8,60 @@ package com.untitled.game;
  */
 public abstract class MoveableGameObject extends GameObject {
 
-	private double horPart;
-	private double verPart;
-	private double speed;
+	private double horSpeed;
+	private double verSpeed;
 
-	public MoveableGameObject(int aXPos, int aYPos, int aWidth, int aHeight, double aHorPart, double aVerPart, double aSpeed) {
+	public MoveableGameObject(int aXPos, int aYPos, int aWidth, int aHeight, double aHorSpeed, double aVerSpeed) {
 		super(aXPos, aYPos, aWidth, aHeight);
-		this.horPart = aHorPart;
-		this.verPart = aVerPart;
-		this.speed = aSpeed;
+		this.horSpeed = aHorSpeed;
+		this.verSpeed = aVerSpeed;
 	}
 
-	public double getHorPart() {
-		return horPart;
+	public MoveableGameObject(int aXPos, int aYPos, int aWidth, int aHeight) {
+		super(aXPos, aYPos, aWidth, aHeight);
+		this.horSpeed = 0;
+		this.verSpeed = 0;
 	}
 
-	public void setHorPart(double horPart) {
-		this.horPart = horPart;
+	public double getHorSpeed() {
+		return horSpeed;
 	}
 
-	public double getSpeed() {
-		return speed;
+	public void setHorSpeed(double horSpeed) {
+		this.horSpeed = horSpeed;
 	}
 
-	public void setSpeed(double speed) {
-		this.speed = speed;
+	public void incHorSpeed(double aValue) {
+		this.horSpeed += aValue;
 	}
 
-	public double getVerPart() {
-		return verPart;
+	public void decHorSpeed(double aValue) {
+		this.horSpeed -= aValue;
 	}
 
-	public void setVerPart(double verPart) {
-		this.verPart = verPart;
+	public double getVerSpeed() {
+		return verSpeed;
+	}
+
+	public void setVerSpeed(double verSpeed) {
+		this.verSpeed = verSpeed;
+	}
+
+	public void incVerSpeed(double aValue) {
+		this.verSpeed += aValue;
+	}
+
+	public void decVerSpeed(double aValue) {
+		this.verSpeed -= aValue;
+	}
+
+	public void move() {
+		setxPos(getxPos() + getHorSpeed());
+		setyPos(getyPos() + getVerSpeed());
+	}
+
+	public void moveReverse() {
+		setxPos(getxPos() - getHorSpeed());
+		setyPos(getyPos() - getVerSpeed());
 	}
 }

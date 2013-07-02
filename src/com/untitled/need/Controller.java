@@ -43,7 +43,6 @@ public class Controller {
 	}
 
 	private void init() {
-		game = new Pong(this);
 		devices = new ArrayList<Device>();
 		acceptThread = new AcceptThread();
 		acceptThread.start();
@@ -54,7 +53,7 @@ public class Controller {
 			@Override
 			public void run() {
 				while (isRunning) {
-					if (game != null) {
+					if (game != null && getHolder() != null) {
 						canvas = null;
 						try {
 							canvas = getHolder().lockCanvas();
@@ -81,9 +80,13 @@ public class Controller {
 		graphicThread.start();
 	}
 
-	public void startGame() {
-		startGraphicThread();
-		game.startGame();
+	public boolean startGame() {
+		if (getDeviceCount() >= getGame().getMinDeviceCount()) {
+			getGame().startGame();
+			startGraphicThread();
+			return true;
+		}
+		return false;
 	}
 
 	public void createBluetoothConnection(BluetoothDevice aDevice) {
@@ -266,5 +269,20 @@ public class Controller {
 				}
 			});
 		}
+	}
+
+	public void setGame(int aGameId) {
+		switch (aGameId) {
+			case CONTROLLER_PONG:
+				game = new Pong(this);
+				break;
+			case CONTROLLER_ARCHER:
+				game = new ArcherMain(this);
+				break;
+		}
+	}
+
+	public boolean isStartable() {
+		return getDeviceCount() >= getGame().getMinDeviceCount();
 	}
 }

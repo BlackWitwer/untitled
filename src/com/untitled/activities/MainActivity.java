@@ -42,12 +42,23 @@ public class MainActivity extends Activity {
 	}
 
 	public void startGame(View view) {
-		Intent gameScreen = new Intent(getApplicationContext(), BluetoothLobby.class);
-		startActivity(gameScreen);
+		setContentView(R.layout.game_choose);
 	}
 
 	public void startController(View view) {
 		Intent controllerScreen = new Intent(getApplicationContext(), DeviceChoose.class);
 		startActivity(controllerScreen);
+	}
+
+	public void onClickPong(View view) {
+		Controller.getController().setGame(Controller.CONTROLLER_PONG);
+		Intent gameScreen = new Intent(getApplicationContext(), BluetoothLobby.class);
+		startActivity(gameScreen);
+	}
+
+	public void onClickArcher(View view) {
+		Controller.getController().setGame(Controller.CONTROLLER_ARCHER);
+		Intent gameScreen = new Intent(getApplicationContext(), BluetoothLobby.class);
+		startActivity(gameScreen);
 	}
 }

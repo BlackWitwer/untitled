@@ -27,8 +27,11 @@ public class GameView extends Activity {
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.game);
+		while( findViewById(R.id.surfaceView) == null) {};
 		Controller.getController().startGame();
 	}
+
+
 
 	@Override
 	protected void onDestroy() {

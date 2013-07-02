@@ -1,6 +1,8 @@
 package com.untitled.game;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,6 +17,7 @@ public abstract class GameObject {
 	private int width;
 	private int height;
 	private boolean visible;
+	private int color;
 
 	public GameObject (int aXPos, int aYPos, int aWidth, int aHeight) {
 		this.xPos = aXPos;
@@ -47,20 +50,20 @@ public abstract class GameObject {
 		this.visible = visible;
 	}
 
-//	public void setHeight(int height) {
-//		this.height = height;
-//	}
-//
-//	public void setWidth(int width) {
-//		this.width = width;
-//	}
-//
 	public void setxPos(double xPos) {
 		this.xPos = xPos;
 	}
 
 	public void setyPos(double yPos) {
 		this.yPos = yPos;
+	}
+
+	public int getColor() {
+		return color;
+	}
+
+	public void setColor(int color) {
+		this.color = color;
 	}
 
 	public boolean checkCollision (GameObject anObject) {
@@ -73,7 +76,11 @@ public abstract class GameObject {
 
 	public void drawOnCanvas(Canvas c) {
 		if (isVisible()) {
-			c.drawRect((float)getxPos(), (float)getyPos(), (float)getxPos() + getWidth(), (float)getyPos() + getHeight(), null);
+			Paint p = new Paint();
+			p.setColor(getColor());
+			p.setAntiAlias(true);
+			p.setStyle(Paint.Style.FILL_AND_STROKE);
+			c.drawRect((float)getxPos(), (float)getyPos(), (float)getxPos() + getWidth(), (float)getyPos() + getHeight(), p);
 		}
 	}
 }

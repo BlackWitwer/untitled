@@ -58,7 +58,9 @@ public class BluetoothLobby extends Activity {
 	}
 
 	public void startGame(View view) {
-		Intent gameView = new Intent(getApplicationContext(), GameView.class);
-		startActivity(gameView);
+		if (Controller.getController().isStartable()) {
+			Intent gameView = new Intent(getApplicationContext(), GameView.class);
+			startActivity(gameView);
+		}
 	}
 }

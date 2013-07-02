@@ -7,8 +7,8 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.view.*;
-import android.widget.TextView;
 import com.example.untitled.R;
+import com.untitled.archer.ArcherMain;
 import com.untitled.need.Controller;
 
 /**
@@ -19,11 +19,14 @@ import com.untitled.need.Controller;
  */
 public class ArcherController extends Activity {
 
+	private static final int lenghtFaktor = 60;
+
 	private SurfaceHolder holder;
 	private Point p1;
 	private Point p2;
 	private Paint paint;
-	private int pointerID = -1;
+	private int pointerID1 = -1;
+	private int pointerID2 = -1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -32,12 +35,13 @@ public class ArcherController extends Activity {
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		Controller.getController().setActivity(this);
-		setContentView(R.layout.controller2);
+		setContentView(R.layout.archer_controller);
 
 		p1 = new Point();
 		p2 = new Point();
 		paint = new Paint();
 		paint.setColor(Color.WHITE);
+		paint.setStrokeWidth(10);
 
 		initMultitouch();
 	}
@@ -75,16 +79,41 @@ public class ArcherController extends Activity {
 		findViewById(R.id.controllerSurface).setOnTouchListener(new View.OnTouchListener() {
 			@Override
 			public boolean onTouch(View view, MotionEvent motionEvent) {
-				if (motionEvent.getAction() == MotionEvent.ACTION_POINTER_1_DOWN && pointerID == -1) {
-					pointerID = motionEvent.getPointerId(motionEvent.getActionIndex());
-				} else if (motionEvent.getAction() == MotionEvent.ACTION_POINTER_1_UP) {
-					pointerID = -1;
+				switch (motionEvent.getActionMasked()) {
+					case MotionEvent.ACTION_DOWN:
+						p1.set((int)motionEvent.getX(), (int)motionEvent.getY());
+						pointerID1 = motionEvent.getPointerId(motionEvent.getActionIndex());
+						break;
+
+					case MotionEvent.ACTION_UP:
+						pointerID1 = -1;
+						pointerID2 = -1;
+						break;
+
+					case MotionEvent.ACTION_POINTER_DOWN:
+						if (pointerID2 < 0) {
+							pointerID2 = motionEvent.getPointerId(motionEvent.getActionIndex());
+							p2.set((int)motionEvent.getX(motionEvent.findPointerIndex(pointerID2)), (int)motionEvent.getY(motionEvent.findPointerIndex(pointerID2)));
+						}
+						break;
+
+					case MotionEvent.ACTION_POINTER_UP:
+						if (motionEvent.getPointerId(motionEvent.getActionIndex()) == pointerID2
+								|| motionEvent.getPointerId(motionEvent.getActionIndex()) == pointerID1) {
+							pointerID2 = -1;
+							pointerID1 = -1;
+						}
+						break;
+
+					case MotionEvent.ACTION_MOVE:
+						if (pointerID1 >= 0 && pointerID2 >= 0) {
+							p1.set((int)motionEvent.getX(pointerID1), (int)motionEvent.getY(pointerID1));
+							p2.set((int)motionEvent.getX(pointerID2), (int)motionEvent.getY(pointerID2));
+						}
+						break;
 				}
-
-				p1.set((int)motionEvent.getX(), (int)motionEvent.getY());
-				p2.set((int)motionEvent.getX(motionEvent.findPointerIndex(pointerID)), (int)motionEvent.getY(motionEvent.findPointerIndex(pointerID)));
-
 				drawArrow();
+				sendPoints();
 				return true;
 			}
 		});
@@ -97,7 +126,14 @@ public class ArcherController extends Activity {
 			synchronized (getCtrlHolder()) {
 				if (canvas != null) {
 					canvas.drawColor(Color.BLACK);
-					canvas.drawLine(p1.x, p1.y, p2.x, p2.y, paint);
+					if (pointerID2 >= 0 && pointerID1 >= 0) {
+						paint.setColor(calcColor());
+						if (getLenght() > ArcherMain.MAX_SPEED *lenghtFaktor) {
+							canvas.drawLine(p1.x, p1.y, getNormX(), getNormY(), paint);
+						} else {
+							canvas.drawLine(p1.x, p1.y, p2.x, p2.y, paint);
+						}
+					}
 				}
 			}
 		} finally {
@@ -107,17 +143,31 @@ public class ArcherController extends Activity {
 		}
 	}
 
-	public static String actionToString(int action) {
-		switch (action) {
+	private int getNormX() {
+		double diffX = p2.x-p1.x;
+		return (int)(p1.x + diffX/getLenght()*ArcherMain.MAX_SPEED *lenghtFaktor);
+	}
 
-			case MotionEvent.ACTION_DOWN: return "Down";
-			case MotionEvent.ACTION_MOVE: return "Move";
-			case MotionEvent.ACTION_POINTER_DOWN: return "Pointer Down";
-			case MotionEvent.ACTION_UP: return "Up";
-			case MotionEvent.ACTION_POINTER_UP: return "Pointer Up";
-			case MotionEvent.ACTION_OUTSIDE: return "Outside";
-			case MotionEvent.ACTION_CANCEL: return "Cancel";
-		}
-		return "";
+	private int getNormY() {
+		double diffY = p2.y-p1.y;
+		return (int)(p1.y + diffY/getLenght()*ArcherMain.MAX_SPEED *lenghtFaktor);
+	}
+
+	private double getLenght() {
+		double diffX = Math.abs(p2.x-p1.x);
+		double diffY = Math.abs(p2.y - p1.y);
+		return Math.sqrt(diffX * diffX + diffY * diffY);
+	}
+
+	private int calcColor() {
+		double lenght = Math.min(getLenght(), ArcherMain.MAX_SPEED *lenghtFaktor);
+		return Color.rgb((int)(255.0/(ArcherMain.MAX_SPEED *lenghtFaktor)*lenght), (int)(255.0/(ArcherMain.MAX_SPEED *lenghtFaktor)*(ArcherMain.MAX_SPEED *lenghtFaktor-lenght)), 0);
+	}
+
+	private void sendPoints() {
+		Controller.getController().sendValue(ArcherMain.P1_X_MASK + p1.x);
+		Controller.getController().sendValue(ArcherMain.P1_Y_MASK + p1.y);
+		Controller.getController().sendValue(ArcherMain.P2_X_MASK + p2.x);
+		Controller.getController().sendValue(ArcherMain.P2_Y_MASK + p2.y);
 	}
 }

@@ -12,7 +12,6 @@ import java.util.UUID;
  * Date: 10.05.13
  * Time: 22:35
  *
- * Ist eine multiple UUID überhaupt notwendig? Oder reicht eine mit immer dem selben ServerSocket.
  */
 public class AcceptThread extends Thread {
 	private final BluetoothServerSocket mmServerSocket;
@@ -26,7 +25,9 @@ public class AcceptThread extends Thread {
 		waitForDevice = false;
 		BluetoothServerSocket tmp = null;
 		try {
-			tmp = BluetoothConnector.getInstance().getAdapter().listenUsingRfcommWithServiceRecord(NAME, UUID.fromString("f01a4800-c3b4-11e2-8b8b-0800200c9a66"));
+			while (tmp == null) {
+				tmp = BluetoothConnector.getInstance().getAdapter().listenUsingRfcommWithServiceRecord(NAME, UUID.fromString("f01a4800-c3b4-11e2-8b8b-0800200c9a66"));
+			}
 		} catch (IOException e) { }
 		mmServerSocket = tmp;
 	}

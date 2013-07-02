@@ -34,7 +34,7 @@ public class MyActivity extends Activity {
 //		requestWindowFeature(Window.FEATURE_NO_TITLE);
 //		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 //				WindowManager.LayoutParams.FLAG_FULLSCREEN);
-//		setContentView(R.layout.controller2);
+//		setContentView(R.layout.archer_controller);
 //		if (!BluetoothConnector.getInstance().getAdapter().isEnabled()) {
 //			Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
 //			startActivityForResult(enableBtIntent, 1);
@@ -96,7 +96,7 @@ public class MyActivity extends Activity {
 //				final BluetoothDevice item = (BluetoothDevice) parent.getItemAtPosition(position);
 //
 //				ctrl.createBluetoothConnection(item);
-//				changeContentView(R.layout.controller);
+//				changeContentView(R.layout.pong_controller);
 //				adapter.notifyDataSetChanged();
 //			}
 //		});
